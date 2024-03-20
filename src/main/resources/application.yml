@@ -1,0 +1,30 @@
+
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/project9
+    password: 6574
+    username: postgres
+
+
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+
+jwt:
+  secret: 984hg493gh0439rthr0429uruj2309yh937gc763fe87t3f89723gf
+  lifetime: 86400000 #1 day
+  expiration-refresh: 604800000 #7 days
+
+cloudinary:
+  cloud_name: drfnzmkqf
+  api_key: 348329312131219
+  api_secret: RyMSRpJCI1vliEo5dfVICndpc6Y
+
+confirm_url: localhost:8080/api/v1/auth/email-confirm/
