@@ -2,9 +2,11 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/project9
-    password: 6574
+#    url: jdbc:postgresql://localhost:5432/project9
+#    password: 6574
     username: postgres
+    url: jdbc:postgresql://viaduct.proxy.rlwy.net:19132/railway
+    password: *F51e54532-dEgcC*d4c-bc4cBCBAD3a
 
 
   jpa:
@@ -27,4 +29,4 @@ cloudinary:
   api_key: 348329312131219
   api_secret: RyMSRpJCI1vliEo5dfVICndpc6Y
 
-confirm_url: localhost:8080/api/v1/auth/email-confirm/
+confirm_url: https://troubled-eyes-project9.up.railway.app/api/v1/auth/email-confirm/
