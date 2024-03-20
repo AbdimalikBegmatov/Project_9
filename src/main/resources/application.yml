@@ -6,7 +6,7 @@ spring:
 #    password: 6574
     username: postgres
     url: jdbc:postgresql://viaduct.proxy.rlwy.net:19132/railway
-    password: *F51e54532-dEgcC*d4c-bc4cBCBAD3a
+    password: 4gaC-5g64feddE*b51d1336eG253aF15
 
 
   jpa:
