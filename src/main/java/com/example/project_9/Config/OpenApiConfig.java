@@ -26,7 +26,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
                 ),
                 @Server(
                         description = "Production ENV",
-                        url = "https://troubled-eyes-production.up.railway.app/"
+                        url = "https://project9-project9.up.railway.app"
                 )
         },
         security = {
