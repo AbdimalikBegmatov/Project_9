@@ -2,8 +2,8 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://viaduct.proxy.rlwy.net:19132/railway
-    password: 4gaC-5g64feddE*b51d1336eG253aF15
+    url: jdbc:postgresql://viaduct.proxy.rlwy.net:29568/railway
+    password: gINrGDzxHMatujjSRgFUIAhVyxRLcoum
     username: postgres
 
 #    url: jdbc:postgresql://localhost:5432/project9
@@ -16,6 +16,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
 

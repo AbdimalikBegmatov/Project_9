@@ -18,6 +18,5 @@ public interface ProfileRepository extends JpaRepository<Profile, UUID> {
     Optional<ProfileLiteDto> findByEmailLite(@Param("email") String email);
     Optional<Profile> findByEmail(String email);
     Boolean existsByEmail(String email);
-    @Query("select p from Profile p where p.activationCode = :code")
     Optional<Profile> findByActivationCode(@Param("code") String code);
 }
