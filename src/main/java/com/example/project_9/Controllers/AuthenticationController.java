@@ -6,6 +6,7 @@ import com.example.project_9.Dtos.Profile.ProfileRequestDto;
 import com.example.project_9.Exceptions.CustomException;
 import com.example.project_9.Services.Impl.AuthenticationService;
 import com.example.project_9.Services.ProfileService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.NonNull;
@@ -38,7 +39,8 @@ public class AuthenticationController {
     }
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<AuthenticationResponse> refreshToken(@RequestHeader(value = "Authorization",required = false)String request) throws IOException {
+    @Operation(summary = "send request with header key:'Refresh-Token' value: 'Bearer (refresh token)'")
+    public ResponseEntity<AuthenticationResponse> refreshToken(@RequestHeader(value = "Refresh-Token",required = false)String request) throws IOException {
         if (request == null)
         {
             throw new CustomException("Need authentication");

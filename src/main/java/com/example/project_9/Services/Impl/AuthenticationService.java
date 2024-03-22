@@ -83,12 +83,6 @@ public class AuthenticationService {
 
     public AuthenticationResponse refreshToken(String refreshToken) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication.getName().equals("anonymousUser")){
-            throw new CustomException("Need authentication to take refresh token");
-        }
-
         if (!refreshToken.startsWith("Bearer ")){
             throw new CustomException("This is not token");
         }
