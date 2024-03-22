@@ -37,6 +37,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth->{
                     auth.requestMatchers("api/v1/profile/**").authenticated();
                     auth.requestMatchers("api/v1/auth/logout").authenticated();
+                    auth.requestMatchers("api/v1/category/**").authenticated();
+                    auth.requestMatchers("api/v1/recipe/**").authenticated();
                     auth.anyRequest().permitAll();
                 })
                 .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

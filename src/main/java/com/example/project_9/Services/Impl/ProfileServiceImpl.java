@@ -1,15 +1,25 @@
 package com.example.project_9.Services.Impl;
 
+import com.example.project_9.Dtos.Author.AuthorResponseDto;
+import com.example.project_9.Dtos.DataResponseDTO;
 import com.example.project_9.Dtos.Profile.ProfileLiteDto;
 import com.example.project_9.Dtos.Profile.ProfileRequestDto;
 import com.example.project_9.Dtos.Profile.ProfileResponseDto;
+import com.example.project_9.Dtos.Profile.ProfileToSearchResponseDTO;
+import com.example.project_9.Dtos.Recipe.RecipeResponseToProfilePage;
 import com.example.project_9.Entity.Profile;
+import com.example.project_9.Entity.Recipe;
 import com.example.project_9.Exceptions.CustomException;
 import com.example.project_9.Exceptions.CustomNotFoundException;
 import com.example.project_9.Repositories.ProfileRepository;
+import com.example.project_9.Repositories.RecipeRepository;
 import com.example.project_9.Services.CloudinaryService;
 import com.example.project_9.Services.ProfileService;
+import com.example.project_9.Services.SubscriptionService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -17,7 +27,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -28,14 +37,21 @@ import java.util.*;
 @Transactional(readOnly = true)
 public class ProfileServiceImpl implements ProfileService {
     private final ProfileRepository profileRepository;
+    private final RecipeRepository recipeRepository;
     private final CloudinaryService cloudinaryService;
+    private final SubscriptionService subscriptionService;
     private final EmailService emailService;
     @Value("${confirm_url}")
     private String urlToConfirm;
 
-    public ProfileServiceImpl(ProfileRepository profileRepository, CloudinaryService cloudinaryService, EmailService emailService) {
+    @Value("${pagesize}")
+    int pagesize;
+
+    public ProfileServiceImpl(ProfileRepository profileRepository, RecipeRepository recipeRepository, CloudinaryService cloudinaryService, SubscriptionService subscriptionService, EmailService emailService) {
         this.profileRepository = profileRepository;
+        this.recipeRepository = recipeRepository;
         this.cloudinaryService = cloudinaryService;
+        this.subscriptionService = subscriptionService;
         this.emailService = emailService;
     }
 
@@ -88,6 +104,9 @@ public class ProfileServiceImpl implements ProfileService {
 
         Profile profile = profileRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(()->new CustomException("Profile not found"));
 
+        int follower = subscriptionService.findByFollower(profile);
+        int following = subscriptionService.findByFollowing(profile);
+
         return new ProfileResponseDto(
                 profile.getId(),
                 profile.getUsername(),
@@ -95,10 +114,11 @@ public class ProfileServiceImpl implements ProfileService {
                 profile.getEmail(),
                 profile.isActive(),
                 profile.getImage(),
-                profile.getFollowers().size(),
-                profile.getFollowing().size(),
+                follower,
+                following,
                 profile.getRecipes().size());
     }
+
 
     @Transactional
     @Override
@@ -125,15 +145,17 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public ProfileResponseDto editProfile(String name, String bio, MultipartFile image) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+
+
         if (email == null){
             throw new CustomException("You must authentication");
         }
 
         Profile result = profileRepository.findByEmail(email).orElseThrow(()-> new CustomNotFoundException("Profile not found"));
 
-        if (image.isEmpty() || !Objects.equals(image.getContentType(), "image/jpeg")){
-            throw new MultipartException("File not found or not support format");
-        }
+        int follower = subscriptionService.findByFollower(result);
+        int following = subscriptionService.findByFollowing(result);
 
         String imageUrl;
 
@@ -156,9 +178,99 @@ public class ProfileServiceImpl implements ProfileService {
                 profile.getEmail(),
                 profile.isActive(),
                 profile.getImage(),
-                profile.getFollowers().size(),
-                profile.getFollowing().size(),
+                follower,
+                following,
                 profile.getRecipes().size());
+    }
+
+    @Override
+    public DataResponseDTO<RecipeResponseToProfilePage> getToProfileSavedPage(int page) {
+        Profile profile = profileRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(()->new CustomNotFoundException("Profile not found"));
+        Page<Recipe> recipe = recipeRepository.findByProfileSave(profile, PageRequest.of(page-1,pagesize, Sort.by("likes")));
+
+        List<RecipeResponseToProfilePage> response = new ArrayList<>();
+
+        recipe.getContent().forEach(r-> response.add(new RecipeResponseToProfilePage(
+                r.getId(),
+                r.getName(),
+                r.getImage(),
+                r.getProfile().getUsername(),
+                r.getLikes().size(),
+                r.getProfileSave().size()
+        )));
+
+        return new DataResponseDTO<RecipeResponseToProfilePage>(
+                recipe.getTotalPages(),
+                page,
+                recipe.hasPrevious(),
+                recipe.hasNext(),
+                response
+        );
+    }
+
+    @Override
+    public AuthorResponseDto getAuthor(String id) {
+        Profile profile = profileRepository.findByIdWithRecipe(id).orElseThrow(()->new CustomNotFoundException("Author not found"));
+        int follower = subscriptionService.findByFollower(profile);
+        int following = subscriptionService.findByFollowing(profile);
+
+        List<RecipeResponseToProfilePage> recipes = new ArrayList<>();
+
+        profile.getRecipes().forEach(r->{
+            recipes.add(new RecipeResponseToProfilePage(
+                    r.getId(),
+                    r.getName(),
+                    r.getImage(),
+                    profile.getUsername(),
+                    r.getLikes().size(),
+                    r.getProfileSave().size()
+            ));
+        });
+        return new AuthorResponseDto(
+                profile.getId(),
+                profile.getUsername(),
+                profile.getAboutMe(),
+                profile.getEmail(),
+                profile.getImage(),
+                follower,
+                following,
+                profile.getRecipes().size(),
+                recipes
+        );
+    }
+
+    @Override
+    @Transactional
+    public HttpStatus follow(String id) {
+
+        Profile profile = profileRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(()->new CustomNotFoundException("Profile not found"));
+        Profile profileFollow = profileRepository.findByIdString(id).orElseThrow(()->new CustomNotFoundException("Profile to follow not found"));
+
+
+
+        if (profile.getId().equals(profileFollow.getId())){
+            throw  new CustomException("Profile not be equals");
+        }
+
+        return subscriptionService.addSubscription(profile,profileFollow);
+    }
+
+    @Override
+    @Transactional
+    public HttpStatus notFollow(String id) {
+        Profile profile = profileRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(()->new CustomNotFoundException("Profile not found"));
+        Profile profileFollow = profileRepository.findByIdString(id).orElseThrow(()->new CustomNotFoundException("Profile to follow not found"));
+
+        if (profile.getId().equals(profileFollow.getId())){
+            throw  new CustomException("Profile not be equals");
+        }
+
+        return subscriptionService.removeSubscription(profile,profileFollow);
+    }
+
+    @Override
+    public List<ProfileToSearchResponseDTO> searchByProfile(String name) {
+        return profileRepository.getByName(name);
     }
 
     @Transactional
@@ -183,6 +295,8 @@ public class ProfileServiceImpl implements ProfileService {
 
         return HttpStatus.OK;
     }
+
+
 
     public Map<String,String> generateActivationCodeAndUrl(){
         Map<String,String> result = new HashMap<>();

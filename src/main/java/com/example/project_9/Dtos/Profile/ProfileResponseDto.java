@@ -1,8 +1,11 @@
 package com.example.project_9.Dtos.Profile;
 
+import com.example.project_9.Dtos.Recipe.RecipeResponseToProfilePage;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -29,4 +32,6 @@ public class ProfileResponseDto {
         this.following = following;
         this.recipeCount = recipeCount;
     }
+
+
 }

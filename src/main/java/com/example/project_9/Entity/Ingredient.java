@@ -18,4 +18,9 @@ public class Ingredient {
     private String name;
     @Column(name = "weight",nullable = false)
     private String weight;
+
+    public Ingredient(String name, String weight) {
+        this.name = name;
+        this.weight = weight;
+    }
 }

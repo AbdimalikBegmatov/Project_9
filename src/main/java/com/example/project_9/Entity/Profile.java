@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "Profile")
@@ -38,23 +39,10 @@ public class Profile {
     @Column(name = "image",nullable = false)
     private String image;
 
-    @ManyToMany
-    @JoinTable(
-            name = "profile_follower",
-            joinColumns = {@JoinColumn(name = "channel_id",unique = true)},
-            inverseJoinColumns = {@JoinColumn(name = "profile_id",unique = true)}
-    )
-    private List<Profile> followers;
+    @ManyToMany(mappedBy = "profileSave")
+    private List<Recipe> savedRecipes;
 
-    @ManyToMany
-    @JoinTable(
-            name = "profile_follower",
-            joinColumns = {@JoinColumn(name = "profile_id",unique = true)},
-            inverseJoinColumns = {@JoinColumn(name = "channel_id",unique = true)}
-    )
-    private List<Profile> following;
-
-    @OneToMany(mappedBy = "profile")
+    @OneToMany(mappedBy = "profile",cascade = CascadeType.ALL)
     private List<Token> tokens;
 
     @OneToMany(mappedBy = "profile")
@@ -68,4 +56,5 @@ public class Profile {
         this.codeConfirmBeginDate = codeConfirmBeginDate;
         this.image = image;
     }
+
 }
