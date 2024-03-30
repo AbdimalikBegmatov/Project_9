@@ -2,19 +2,16 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://viaduct.proxy.rlwy.net:29568/railway
-    password: gINrGDzxHMatujjSRgFUIAhVyxRLcoum
-    username: postgres
 
+    url: jdbc:postgresql://roundhouse.proxy.rlwy.net:52291/railway
+    password: LYqvJXrSsLUVTrmLMDSlgOxMsQCoRxDA
+    username: postgres
 #    url: jdbc:postgresql://localhost:5432/project9
 #    password: 6574
 
 
 
   jpa:
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
 
@@ -31,5 +28,5 @@ cloudinary:
 
 pagesize: 5
 
-confirm_url: https://project9-project9.up.railway.app/api/v1/auth/email-confirm/
+confirm_url: http://134.209.232.69/api/v1/auth/email-confirm/
 #confirm_url: localhost:8080/api/v1/auth/email-confirm/
